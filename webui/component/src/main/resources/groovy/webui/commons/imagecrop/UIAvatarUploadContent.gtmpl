@@ -1,0 +1,71 @@
+<%
+/*
+<!--
+
+    Copyright (C) 2003-2007 eXo Platform SAS.
+
+    This program is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Affero General Public License
+    as published by the Free Software Foundation; either version 3
+    of the License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, see<http://www.gnu.org/licenses/>.
+
+-->
+*/
+%>
+<%
+  import org.exoplatform.social.core.model.AvatarAttachment;
+  def avatarAttachment = uicomponent.avatarAttachment
+  def uicomponentId = uicomponent.id
+  def lalbelFileName = _ctx.appRes("${uicomponentId}.label.file_name")
+  def labelFileType = _ctx.appRes("${uicomponentId}.label.file_type")
+  def labelImageSize = _ctx.appRes("${uicomponentId}.label.image_size")
+  def cropLabel = _ctx.appRes("${uicomponentId}.label.Crop");
+  def labelSave = _ctx.appRes("${uicomponentId}.label.save")
+  def labelCancel = _ctx.appRes("${uicomponentId}.label.cancel")
+  def avatarTitle = _ctx.appRes("${uicomponentId}.title.Avatar");
+  
+  def cropAction = uicomponent.event("Crop")
+  def saveAction = uicomponent.event("Save")
+  def cancelAction = uicomponent.event("Cancel")
+  def imageSource = uicomponent.imageSource;
+  
+  def params = """ {
+	  cropLabel: '${cropLabel}'
+	} """
+  
+  def jsmanager = _ctx.getRequestContext().getJavascriptManager();
+  jsmanager.require("SHARED/social-image-cropper", "imageCropper").addScripts("imageCropper.UIImageCropper.init($params);");
+%>
+
+<div class="$uicomponent.id">
+  <% uiform.begin() %>
+  <div class="AvatarInfo ClearFix">
+    <div id="wrapper" class="FL">
+      <div class="image-decorator">
+        <img id="profileAvatar" src="$imageSource" title="$avatarTitle" alt="$avatarTitle" />
+      </div>
+	  </div>
+	  <div class="FL">
+     <span>$lalbelFileName</span></span> <%= avatarAttachment.fileName %><br/>
+     <span>$labelFileType</span> <%= avatarAttachment.mimeType %><br/>
+     <span>$labelImageSize</span> <%= avatarAttachment.size %>
+     <% uiform.renderField("croppedInfo")%>
+    </div>
+  </div>
+  
+  <div class="UIAction">
+    <a onclick="$cropAction" id="cropAction" data="crop" href="javascript:void(0);" class="ActionButton LightBlueStyle">$cropLabel</a>
+    <a onclick="$saveAction" href="javascript:void(0);" class="ActionButton LightBlueStyle">$labelSave</a>
+    <a onclick="$cancelAction" href="javascript:void(0);" class="ActionButton LightBlueStyle">$labelCancel</a>
+  </div>
+  
+  <% uiform.end(); %>
+</div>
