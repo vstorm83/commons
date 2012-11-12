@@ -10,6 +10,14 @@
 		<css-path>/skin/DefaultSkin/commons/Stylesheet.css</css-path>
 		<css-priority>5</css-priority>
 	</portal-skin>
+	
+ 
+  	<portal-skin>
+		<skin-name>Default</skin-name>
+		<skin-module>DocumentSelector</skin-module>
+		<css-path>/skin/DefaultSkin/commons/UIImageCropping/jWindowCrop.css</css-path>
+		<css-priority>1</css-priority>
+	</portal-skin>
 
 	<module>
 		<name>commons-document</name>
@@ -48,33 +56,22 @@
 	</module>
 	
 	
-<!-- image cropping -->	
-    <portlet-skin>
-    <application-name>webui-portlet-test</application-name>
-    <portlet-name>imagecrop</portlet-name>
-    <skin-name>Default</skin-name>
-    <css-path>/skin/TestPortlet/DefaultSkin/UIImageCropping/jWindowCrop.css</css-path>
-    <css-priority>1</css-priority>
-  </portlet-skin>
-  
-  
+<!-- image cropping -->
 	 <module>
 	    <name>jWindowCropper</name>
 	    <script>	       
-	       <path>/javascript/eXo/social/webui/jWindowCrop.js</path>
+	       <path>/javascript/eXo/commons/jWindowCrop.js</path>
 	    </script>
 	    <depends>
 	      <module>jquery</module>
 	      <as>$</as>
 	    </depends>
-	  </module>     
-  
-  
+	  </module>      
    
 	 <module>
 	    <name>commons-image-cropper</name>
 	    <script>	       
-	       <path>/javascript/eXo/social/webui/UIImageCropper.js</path>
+	       <path>/javascript/eXo/commons/UIImageCropper.js</path>
 	    </script>
 	    <depends>
 	      <module>jquery</module>
