@@ -46,6 +46,47 @@
 			<path>/ckeditor/eXoConfig.js</path>
 		</script>
 	</module>
+	
+	
+<!-- image cropping -->	
+    <portlet-skin>
+    <application-name>webui-portlet-test</application-name>
+    <portlet-name>imagecrop</portlet-name>
+    <skin-name>Default</skin-name>
+    <css-path>/skin/TestPortlet/DefaultSkin/UIImageCropping/jWindowCrop.css</css-path>
+    <css-priority>1</css-priority>
+  </portlet-skin>
+  
+  
+	 <module>
+	    <name>jWindowCropper</name>
+	    <script>	       
+	       <path>/javascript/eXo/social/webui/jWindowCrop.js</path>
+	    </script>
+	    <depends>
+	      <module>jquery</module>
+	      <as>$</as>
+	    </depends>
+	  </module>     
+  
+  
+   
+	 <module>
+	    <name>commons-image-cropper</name>
+	    <script>	       
+	       <path>/javascript/eXo/social/webui/UIImageCropper.js</path>
+	    </script>
+	    <depends>
+	      <module>jquery</module>
+	      <as>$</as>
+	    </depends>
+	   	<depends>
+	       <module>jWindowCropper</module>
+	       <as>jWCropper</as>
+	    </depends>
+	  </module>   	
+	
+	
 
 </gatein-resources>
 

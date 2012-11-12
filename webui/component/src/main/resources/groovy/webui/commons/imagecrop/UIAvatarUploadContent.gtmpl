@@ -42,7 +42,7 @@
 	} """
   
   def jsmanager = _ctx.getRequestContext().getJavascriptManager();
-  jsmanager.require("SHARED/social-image-cropper", "imageCropper").addScripts("imageCropper.UIImageCropper.init($params);");
+  jsmanager.require("SHARED/commons-image-cropper", "imageCropper").addScripts("imageCropper.UIImageCropper.init($params);");
 %>
 
 <div class="$uicomponent.id">
