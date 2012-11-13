@@ -43,22 +43,21 @@ import org.exoplatform.webui.form.UIForm;
 import org.exoplatform.webui.form.UIFormStringInput;
 
 /**
- * Displays uploaded content from UIAvatarUploader.<br>
- *
- * Author : eXoPlatform
- *          exo@exoplatform.com
- * Nov 4, 2009
+ * Created by The eXo Platform SAS
+ * Author : An Bao NGUYEN
+ *         annb@exoplatform.com
+ * Oct 31, 2012  
  */
 @ComponentConfig(
   lifecycle = UIFormLifecycle.class,
-  template = "app:groovy/imagecrop/portlet/UIAvatarUploadContent.gtmpl",
+  template = "app:groovy/imagecrop/portlet/UIImageUploadContent.gtmpl",
   events = {
-    @EventConfig(listeners = UIAvatarUploadContent.CropActionListener.class),
-    @EventConfig(listeners = UIAvatarUploadContent.SaveActionListener.class, phase = Phase.PROCESS),
-    @EventConfig(listeners = UIAvatarUploadContent.CancelActionListener.class)
+    @EventConfig(listeners = UIImageUploadContent.CropActionListener.class),
+    @EventConfig(listeners = UIImageUploadContent.SaveActionListener.class, phase = Phase.PROCESS),
+    @EventConfig(listeners = UIImageUploadContent.CancelActionListener.class)
   }
 )
-public class UIAvatarUploadContent extends UIForm {
+public class UIImageUploadContent extends UIForm {
 
   private static final String CROPPED_INFO = "croppedInfo";
   private static final String X = "X";
@@ -67,7 +66,7 @@ public class UIAvatarUploadContent extends UIForm {
   private static final String HEIGHT = "HEIGHT";
   
   /** AvatarAttachment instance. */
-  private AvatarAttachment avatarAttachment;
+  private ImageAttachment avatarAttachment;
 
   /** Stores information of image storage. */
   private String imageSource;
@@ -84,7 +83,7 @@ public class UIAvatarUploadContent extends UIForm {
    * Default constructor.<br>
    *
    */
-  public UIAvatarUploadContent() {
+  public UIImageUploadContent() {
     UIFormStringInput input = new UIFormStringInput(CROPPED_INFO, CROPPED_INFO, "0");
     input.setId(CROPPED_INFO);
     addUIFormInput(input);
@@ -93,12 +92,12 @@ public class UIAvatarUploadContent extends UIForm {
   /**
    * Initializes object at the first run time.<br>
    *
-   * @param AvatarAttachment
+   * @param ImageAttachment
    *        Information about attachment.
    *
    * @throws Exception
    */
-  public UIAvatarUploadContent(AvatarAttachment avatarAttachment) throws Exception {
+  public UIImageUploadContent(ImageAttachment avatarAttachment) throws Exception {
     this.avatarAttachment = avatarAttachment;
     setImageSource(avatarAttachment.getImageBytes());
   }
@@ -109,18 +108,18 @@ public class UIAvatarUploadContent extends UIForm {
    *
    * @return AvatarAttachment
    */
-  public AvatarAttachment getAvatarAttachment() {
+  public ImageAttachment getAvatarAttachment() {
     return avatarAttachment;
   }
 
   /**
    * Sets information of AvatarAttachment.<br>
    *
-   * @param AvatarAttachment
+   * @param ImageAttachment
    *
    * @throws Exception
    */
-  public void setAvatarAttachment(AvatarAttachment avatarAttachment) throws Exception {
+  public void setAvatarAttachment(ImageAttachment avatarAttachment) throws Exception {
     this.avatarAttachment = avatarAttachment;
     setImageSource(avatarAttachment.getImageBytes());
   }
@@ -186,11 +185,11 @@ public class UIAvatarUploadContent extends UIForm {
    * Crop image, make preview image.
    *
    */
-  public static class CropActionListener extends EventListener<UIAvatarUploadContent> {
+  public static class CropActionListener extends EventListener<UIImageUploadContent> {
     @Override
-    public void execute(Event<UIAvatarUploadContent> event) throws Exception {
-      UIAvatarUploadContent uiAvatarUploadContent = event.getSource();
-      AvatarAttachment att = uiAvatarUploadContent.avatarAttachment;
+    public void execute(Event<UIImageUploadContent> event) throws Exception {
+      UIImageUploadContent uiAvatarUploadContent = event.getSource();
+      ImageAttachment att = uiAvatarUploadContent.avatarAttachment;
       
       String croppedInfoVal =  ((UIFormStringInput)uiAvatarUploadContent.getChildById(CROPPED_INFO)).getValue();
       Map<String, String> croppedInfos = getCroppedInfoValues(croppedInfoVal);
@@ -251,10 +250,10 @@ public class UIAvatarUploadContent extends UIForm {
    * Closes the popup window, refreshes UIProfile.
    *
    */
-  public static class SaveActionListener extends EventListener<UIAvatarUploadContent> {
+  public static class SaveActionListener extends EventListener<UIImageUploadContent> {
     @Override
-    public void execute(Event<UIAvatarUploadContent> event) throws Exception {
-      UIAvatarUploadContent uiAvatarUploadContent = event.getSource();
+    public void execute(Event<UIImageUploadContent> event) throws Exception {
+      UIImageUploadContent uiAvatarUploadContent = event.getSource();
       
       // crop image
       uiAvatarUploadContent.crop();
@@ -265,7 +264,7 @@ public class UIAvatarUploadContent extends UIForm {
       //Utils.updateWorkingWorkSpace();
     }
 
-    private void saveAvatar(UIAvatarUploadContent uiAvatarUploadContent) throws Exception {
+    private void saveAvatar(UIImageUploadContent uiAvatarUploadContent) throws Exception {
       UIComponent parent =uiAvatarUploadContent.getParent();
       while (parent != null) {
          /*if (UISpaceInfo.class.isInstance(parent)) {
@@ -294,8 +293,8 @@ public class UIAvatarUploadContent extends UIForm {
    * @throws Exception
    * @since 1.2.2
    */
-  public void saveUserAvatar(UIAvatarUploadContent uiAvatarUploadContent) throws Exception {
-    AvatarAttachment attacthment = uiAvatarUploadContent.getAvatarAttachment();
+  public void saveUserAvatar(UIImageUploadContent uiAvatarUploadContent) throws Exception {
+    ImageAttachment attacthment = uiAvatarUploadContent.getAvatarAttachment();
     
     /*Profile p = Utils.getOwnerIdentity().getProfile();
     p.setProperty(Profile.AVATAR, attacthment);
@@ -315,10 +314,10 @@ public class UIAvatarUploadContent extends UIForm {
    * Cancels, close the popup window.
    *
    */
-  public static class CancelActionListener extends EventListener<UIAvatarUploadContent> {
+  public static class CancelActionListener extends EventListener<UIImageUploadContent> {
     @Override
-    public void execute(Event<UIAvatarUploadContent> event) throws Exception {
-      UIAvatarUploadContent uiAvatarUploadContent = event.getSource();
+    public void execute(Event<UIImageUploadContent> event) throws Exception {
+      UIImageUploadContent uiAvatarUploadContent = event.getSource();
       UIPopupWindow uiPopup = uiAvatarUploadContent.getParent();
       uiPopup.setShow(false);
     }
@@ -403,7 +402,7 @@ public class UIAvatarUploadContent extends UIForm {
     // sub image with new information
     BufferedImage croppedImg = originImg.getSubimage(x_co, y_co, width_co, height_co);
     
-    AvatarAttachment att = getAvatarAttachment();
+    ImageAttachment att = getAvatarAttachment();
     MimeTypeResolver mimeTypeResolver = new MimeTypeResolver();
     String extension = mimeTypeResolver.getExtension(att.getMimeType());
     

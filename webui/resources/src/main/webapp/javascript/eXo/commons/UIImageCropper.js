@@ -21,7 +21,6 @@
 		$('img#profileAvatar').jWindowCrop({
 			targetWidth: 240,
 			targetHeight: 240,
-			loadingText: 'hello world',
 			onChange: function(result) {				
 				$('#crop_x').text(result.cropX);
 				$('#crop_y').text(result.cropY);

@@ -27,16 +27,15 @@ import org.exoplatform.services.jcr.RepositoryService;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
-/*
- * This class using for attachment profile of identity or of space, such as
- * image.
- *
- * @author  <a href="mailto:tungcnw@gmail.com">dang.tung</a>
- * @since   Sep 11, 2009
+/**
+ * Created by The eXo Platform SAS
+ * Author : An Bao NGUYEN
+ *         annb@exoplatform.com
+ * Oct 31, 2012  
  */
-public class AvatarAttachment {
+public class ImageAttachment {
 
-  private static final Log LOG = ExoLogger.getLogger(AvatarAttachment.class);
+  private static final Log LOG = ExoLogger.getLogger(ImageAttachment.class);
 
   /**
    * The id.
@@ -68,7 +67,7 @@ public class AvatarAttachment {
    */
   private long lastModified;
 
-  public AvatarAttachment() {
+  public ImageAttachment() {
   }
 
   /**
@@ -82,7 +81,7 @@ public class AvatarAttachment {
    * @param lastModified
    * @throws Exception
    */
-  public AvatarAttachment(String id,
+  public ImageAttachment(String id,
                           String fileName,
                           String mimeType,
                           InputStream inputStream,

@@ -40,21 +40,21 @@ import org.exoplatform.webui.config.annotation.EventConfig;
 
 /**
  * Created by The eXo Platform SAS
- * Author : Canh Pham Van
- *          canhpv@exoplatform.com
+ * Author : An Bao NGUYEN
+ *         annb@exoplatform.com
  * Oct 31, 2012  
  */
 @ComponentConfigs ({
   @ComponentConfig(
     lifecycle = UIFormLifecycle.class,
-    template = "app:groovy/imagecrop/portlet/UIAvatarUploader.gtmpl",
+    template = "app:groovy/imagecrop/portlet/UIImageUploader.gtmpl",
     events = {
-      @EventConfig(listeners = UIAvatarUploader.ConfirmActionListener.class),
-      @EventConfig(listeners = UIAvatarUploader.CancelActionListener.class)
+      @EventConfig(listeners = UIImageUploader.ConfirmActionListener.class),
+      @EventConfig(listeners = UIImageUploader.CancelActionListener.class)
     }
   )
 })
-public class UIAvatarUploader extends UIForm{
+public class UIImageUploader extends UIForm{
   
   /** Message alert that image is not uploaded successfully. */
   private static final String MSG_IMG_NOT_UPLOADED = "UIAvatarUploader.msg.img_not_loaded";
@@ -93,7 +93,7 @@ public class UIAvatarUploader extends UIForm{
    * Initializes upload form.<br>\
    *
    */
-  public UIAvatarUploader() throws Exception {
+  public UIImageUploader() throws Exception {
     uiAvatarUploadInput = new UIFormUploadInput(FIELD_UPLOADER, null, uploadLimit);
     uiAvatarUploadInput.setAutoUpload(true);
     addUIFormInput(uiAvatarUploadInput);
@@ -129,18 +129,18 @@ public class UIAvatarUploader extends UIForm{
    * Changes and displays avatar on the profile if upload successful, else
    * inform user to upload image.
    */
-  public static class ConfirmActionListener extends EventListener<UIAvatarUploader> {
+  public static class ConfirmActionListener extends EventListener<UIImageUploader> {
     // The width of resized avatar fix 200px like facebook avatar
     private static final int WIDTH = 200;
 
     @Override
-    public void execute(Event<UIAvatarUploader> event) throws Exception {
+    public void execute(Event<UIImageUploader> event) throws Exception {
       WebuiRequestContext ctx = event.getRequestContext();
       UIApplication uiApplication = ctx.getUIApplication();
-      UIAvatarUploader uiAvatarUploader = event.getSource();
+      UIImageUploader uiAvatarUploader = event.getSource();
       UIFormUploadInput uiAvatarUploadInput = uiAvatarUploader.getChild(UIFormUploadInput.class);
       UIPopupWindow uiPopup = uiAvatarUploader.getParent();
-      UIAvatarUploadContent uiAvatarUploadContent = uiAvatarUploader.createUIComponent(UIAvatarUploadContent.class,
+      UIImageUploadContent uiAvatarUploadContent = uiAvatarUploader.createUIComponent(UIImageUploadContent.class,
                                                                                        null,
                                                                                        null);
       
@@ -179,7 +179,7 @@ public class UIAvatarUploader extends UIForm{
         
         // Resize avatar to fixed width if can't(avatarAttachment == null) keep
         // origin avatar
-        AvatarAttachment avatarAttachment = ImageUtils.createResizedAvatarAttachment(uploadedStream,
+        ImageAttachment avatarAttachment = ImageUtils.createResizedAvatarAttachment(uploadedStream,
                                                                                     WIDTH,
                                                                                     0,
                                                                                     null,
@@ -187,7 +187,7 @@ public class UIAvatarUploader extends UIForm{
                                                                                     mimeType,
                                                                                     null);
         if (avatarAttachment == null) {
-          avatarAttachment = new AvatarAttachment(null,
+          avatarAttachment = new ImageAttachment(null,
                                                   fileName,
                                                   mimeType,
                                                   uploadedStream,
@@ -209,11 +209,11 @@ public class UIAvatarUploader extends UIForm{
    * Cancels the upload image.<br>
    *
    */
-  public static class CancelActionListener extends EventListener<UIAvatarUploader> {
+  public static class CancelActionListener extends EventListener<UIImageUploader> {
 
     @Override
-    public void execute(Event<UIAvatarUploader> event) throws Exception {
-      UIAvatarUploader uiAvatarUploader = event.getSource();
+    public void execute(Event<UIImageUploader> event) throws Exception {
+      UIImageUploader uiAvatarUploader = event.getSource();
       UIPopupWindow uiPopup = uiAvatarUploader.getParent();
       uiPopup.setShow(false);
     }
