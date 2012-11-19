@@ -22,12 +22,16 @@
 %>
 <% 
   def fieldName
+  def uicomponentId = uicomponent.id  
+  def labelCanUpload = _ctx.appRes("${uicomponentId}.label.CanUpload")
+  def labelAfterUpload = _ctx.appRes("${uicomponentId}.label.AfterUpload")
   def jsmanager = _ctx.getRequestContext().getJavascriptManager();
   jsmanager.require("SHARED/uiForm", "uiForm");
 %>
 <div class="UIForm $uicomponent.id">
   <div class="HorizontalLayout">
     <div class="FormContainer">
+    <span>$labelCanUpload</span><br/>
       <%uiform.begin()%>
       <table class="UIFormGrid">
         <% 
@@ -54,6 +58,8 @@
             }
           %>
       </table>
+      <span>$labelAfterUpload</span><br/>
+        <hr/>
       <div class="UIAction">
       <% for(action in uicomponent.getActions()) { 
                    def actionLabel = _ctx.appRes(uicomponent.getName() + ".action." + action);

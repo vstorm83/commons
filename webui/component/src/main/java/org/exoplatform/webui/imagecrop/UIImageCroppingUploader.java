@@ -29,6 +29,7 @@ import org.exoplatform.web.application.ApplicationMessage;
 import org.exoplatform.webui.application.WebuiRequestContext;
 import org.exoplatform.webui.config.annotation.ComponentConfig;
 import org.exoplatform.webui.config.annotation.ComponentConfigs;
+import org.exoplatform.webui.config.annotation.EventConfig;
 import org.exoplatform.webui.core.UIApplication;
 import org.exoplatform.webui.core.UIPopupWindow;
 import org.exoplatform.webui.core.lifecycle.UIFormLifecycle;
@@ -36,25 +37,24 @@ import org.exoplatform.webui.event.Event;
 import org.exoplatform.webui.event.EventListener;
 import org.exoplatform.webui.form.UIForm;
 import org.exoplatform.webui.form.UIFormUploadInput;
-import org.exoplatform.webui.config.annotation.EventConfig;
 
 /**
  * Created by The eXo Platform SAS
  * Author : An Bao NGUYEN
- *         annb@exoplatform.com
+ *          annb@exoplatform.com
  * Oct 31, 2012  
  */
 @ComponentConfigs ({
   @ComponentConfig(
     lifecycle = UIFormLifecycle.class,
-    template = "app:groovy/imagecrop/portlet/UIImageUploader.gtmpl",
+    template = "app:groovy/webui/commons/imagecrop/UIImageCroppingUploader.gtmpl",
     events = {
-      @EventConfig(listeners = UIImageUploader.ConfirmActionListener.class),
-      @EventConfig(listeners = UIImageUploader.CancelActionListener.class)
+      @EventConfig(listeners = UIImageCroppingUploader.ConfirmActionListener.class),
+      @EventConfig(listeners = UIImageCroppingUploader.CancelActionListener.class)
     }
   )
 })
-public class UIImageUploader extends UIForm{
+public class UIImageCroppingUploader extends UIForm{
   
   /** Message alert that image is not uploaded successfully. */
   private static final String MSG_IMG_NOT_UPLOADED = "UIAvatarUploader.msg.img_not_loaded";
@@ -93,7 +93,7 @@ public class UIImageUploader extends UIForm{
    * Initializes upload form.<br>\
    *
    */
-  public UIImageUploader() throws Exception {
+  public UIImageCroppingUploader() throws Exception {
     uiAvatarUploadInput = new UIFormUploadInput(FIELD_UPLOADER, null, uploadLimit);
     uiAvatarUploadInput.setAutoUpload(true);
     addUIFormInput(uiAvatarUploadInput);
@@ -129,18 +129,18 @@ public class UIImageUploader extends UIForm{
    * Changes and displays avatar on the profile if upload successful, else
    * inform user to upload image.
    */
-  public static class ConfirmActionListener extends EventListener<UIImageUploader> {
+  public static class ConfirmActionListener extends EventListener<UIImageCroppingUploader> {
     // The width of resized avatar fix 200px like facebook avatar
-    private static final int WIDTH = 200;
+    private static final int WIDTH = 240;
 
     @Override
-    public void execute(Event<UIImageUploader> event) throws Exception {
+    public void execute(Event<UIImageCroppingUploader> event) throws Exception {
       WebuiRequestContext ctx = event.getRequestContext();
       UIApplication uiApplication = ctx.getUIApplication();
-      UIImageUploader uiAvatarUploader = event.getSource();
+      UIImageCroppingUploader uiAvatarUploader = event.getSource();
       UIFormUploadInput uiAvatarUploadInput = uiAvatarUploader.getChild(UIFormUploadInput.class);
       UIPopupWindow uiPopup = uiAvatarUploader.getParent();
-      UIImageUploadContent uiAvatarUploadContent = uiAvatarUploader.createUIComponent(UIImageUploadContent.class,
+      UIImageCroppingUploadContent uiAvatarUploadContent = uiAvatarUploader.createUIComponent(UIImageCroppingUploadContent.class,
                                                                                        null,
                                                                                        null);
       
@@ -178,16 +178,19 @@ public class UIImageUploader extends UIForm{
         }
         
         // Resize avatar to fixed width if can't(avatarAttachment == null) keep
-        // origin avatar
-        ImageAttachment avatarAttachment = ImageUtils.createResizedAvatarAttachment(uploadedStream,
-                                                                                    WIDTH,
-                                                                                    0,
-                                                                                    null,
-                                                                                    fileName,
-                                                                                    mimeType,
-                                                                                    null);
+//         origin avatar
+        ImageCroppingAttachment avatarAttachment =null;
+//        AvatarAttachment avatarAttachment = ImageUtils.createResizedAvatarAttachment(uploadedStream,
+//                                                                                    0,
+//                                                                                    WIDTH,
+//                                                                                    null,
+//                                                                                    fileName,
+//                                                                                    mimeType,
+//                                                                                    null);
+ 
+        
         if (avatarAttachment == null) {
-          avatarAttachment = new ImageAttachment(null,
+          avatarAttachment = new ImageCroppingAttachment(null,
                                                   fileName,
                                                   mimeType,
                                                   uploadedStream,
@@ -209,12 +212,13 @@ public class UIImageUploader extends UIForm{
    * Cancels the upload image.<br>
    *
    */
-  public static class CancelActionListener extends EventListener<UIImageUploader> {
+  public static class CancelActionListener extends EventListener<UIImageCroppingUploader> {
 
     @Override
-    public void execute(Event<UIImageUploader> event) throws Exception {
-      UIImageUploader uiAvatarUploader = event.getSource();
+    public void execute(Event<UIImageCroppingUploader> event) throws Exception {
+      UIImageCroppingUploader uiAvatarUploader = event.getSource();
       UIPopupWindow uiPopup = uiAvatarUploader.getParent();
+      uiPopup.setUIComponent(null);
       uiPopup.setShow(false);
     }
 

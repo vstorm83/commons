@@ -60,7 +60,7 @@
 	 <module>
 	    <name>jWindowCropper</name>
 	    <script>	       
-	       <path>/javascript/eXo/commons/jWindowCrop.js</path>
+	       <path>/javascript/eXo/imagecrop/jWindowCrop.js</path>
 	    </script>
 	    <depends>
 	      <module>jquery</module>
@@ -71,7 +71,7 @@
 	 <module>
 	    <name>commons-image-cropper</name>
 	    <script>	       
-	       <path>/javascript/eXo/commons/UIImageCropper.js</path>
+	       <path>/javascript/eXo/imagecrop/UIImageCropper.js</path>
 	    </script>
 	    <depends>
 	      <module>jquery</module>

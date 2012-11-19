@@ -21,7 +21,7 @@
 */
 %>
 <%
-  import org.exoplatform.social.core.model.AvatarAttachment;
+  
   def avatarAttachment = uicomponent.avatarAttachment
   def uicomponentId = uicomponent.id
   def lalbelFileName = _ctx.appRes("${uicomponentId}.label.file_name")
@@ -30,7 +30,7 @@
   def cropLabel = _ctx.appRes("${uicomponentId}.label.Crop");
   def labelSave = _ctx.appRes("${uicomponentId}.label.save")
   def labelCancel = _ctx.appRes("${uicomponentId}.label.cancel")
-  def avatarTitle = _ctx.appRes("${uicomponentId}.title.Avatar");
+  def imageAlt = _ctx.appRes("${uicomponentId}.title.Avatar");
   
   def cropAction = uicomponent.event("Crop")
   def saveAction = uicomponent.event("Save")
@@ -38,29 +38,30 @@
   def imageSource = uicomponent.imageSource;
   
   def params = """ {
-	  cropLabel: '${cropLabel}'
+ 'imageSource': '${imageSource}',
+  'imageAlt': '${imageAlt}'
 	} """
   
   def jsmanager = _ctx.getRequestContext().getJavascriptManager();
   jsmanager.require("SHARED/commons-image-cropper", "imageCropper").addScripts("imageCropper.UIImageCropper.init($params);");
+  
 %>
 
 <div class="$uicomponent.id">
   <% uiform.begin() %>
   <div class="AvatarInfo ClearFix">
     <div id="wrapper" class="FL">
-      <div class="image-decorator">
-        <img id="profileAvatar" src="$imageSource" title="$avatarTitle" alt="$avatarTitle" />
-      </div>
+        <div class="image-decorator" id="imageCropping">
+        </div>
 	  </div>
-	  <div class="FL">
-     <span>$lalbelFileName</span></span> <%= avatarAttachment.fileName %><br/>
-     <span>$labelFileType</span> <%= avatarAttachment.mimeType %><br/>
-     <span>$labelImageSize</span> <%= avatarAttachment.size %>
+	  </div>
+
+      
+    <div class="FL">
      <% uiform.renderField("croppedInfo")%>
-    </div>
-  </div>
-  
+    </div>   
+
+<hr/>
   <div class="UIAction">
     <a onclick="$cropAction" id="cropAction" data="crop" href="javascript:void(0);" class="ActionButton LightBlueStyle">$cropLabel</a>
     <a onclick="$saveAction" href="javascript:void(0);" class="ActionButton LightBlueStyle">$labelSave</a>

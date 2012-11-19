@@ -1,3 +1,4 @@
+package org.exoplatform.webui.imagecrop;
 /*
  * Copyright (C) 2003-2007 eXo Platform SAS.
  *
@@ -14,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see<http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.webui.imagecrop;
 
 import java.io.InputStream;
 
@@ -30,12 +30,12 @@ import org.exoplatform.services.log.Log;
 /**
  * Created by The eXo Platform SAS
  * Author : An Bao NGUYEN
- *         annb@exoplatform.com
+ *          annb@exoplatform.com
  * Oct 31, 2012  
  */
-public class ImageAttachment {
+public class ImageCroppingAttachment {
 
-  private static final Log LOG = ExoLogger.getLogger(ImageAttachment.class);
+  private static final Log LOG = ExoLogger.getLogger(ImageCroppingAttachment.class);
 
   /**
    * The id.
@@ -67,7 +67,7 @@ public class ImageAttachment {
    */
   private long lastModified;
 
-  public ImageAttachment() {
+  public ImageCroppingAttachment() {
   }
 
   /**
@@ -81,7 +81,7 @@ public class ImageAttachment {
    * @param lastModified
    * @throws Exception
    */
-  public ImageAttachment(String id,
+  public ImageCroppingAttachment(String id,
                           String fileName,
                           String mimeType,
                           InputStream inputStream,

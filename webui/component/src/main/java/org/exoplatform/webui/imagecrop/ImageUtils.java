@@ -1,4 +1,7 @@
+package org.exoplatform.webui.imagecrop;
+
 /*
+
 
  * Copyright (C) 2003-2010 eXo Platform SAS.
  *
@@ -15,7 +18,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see<http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.webui.imagecrop;
 
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -30,7 +32,10 @@ import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
 
 /**
- * @author tuan_nguyenxuan Oct 29, 2010
+ * Created by The eXo Platform SAS
+ * Author : An Bao NGUYEN
+ *          annb@exoplatform.com
+ * Oct 31, 2012  
  */
 public class ImageUtils {
   public static final String KEY_SEPARATOR           = "_";
@@ -90,7 +95,7 @@ public class ImageUtils {
    * @return new AvatarAtachment that contain parameter values and resized
    *         avatar
    */
-  public static ImageAttachment createResizedAvatarAttachment(InputStream imageStream,
+  public static ImageCroppingAttachment createResizedAvatarAttachment(InputStream imageStream,
                                                                int width,
                                                                int height,
                                                                String avatarId,
@@ -128,7 +133,7 @@ public class ImageUtils {
                     tmp);
 
       // Create new avatar attachment
-      ImageAttachment newAvatarAttachment = new ImageAttachment(avatarId,
+      ImageCroppingAttachment newAvatarAttachment = new ImageCroppingAttachment(avatarId,
                                                                   avatarFileName,
                                                                   avatarMimeType,
                                                                   new FileInputStream(tmp),
