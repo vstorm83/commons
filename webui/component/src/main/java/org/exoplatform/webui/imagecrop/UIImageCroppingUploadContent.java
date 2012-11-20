@@ -20,17 +20,34 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.jcr.Node;
+import javax.jcr.RepositoryException;
+import javax.jcr.Session;
+import javax.jcr.Value;
 
+import org.apache.commons.lang.StringUtils;
 import org.exoplatform.commons.utils.MimeTypeResolver;
+import org.exoplatform.container.PortalContainer;
 import org.exoplatform.download.DownloadService;
 import org.exoplatform.download.InputStreamDownloadResource;
+import org.exoplatform.portal.application.PortalRequestContext;
+import org.exoplatform.services.jcr.RepositoryService;
+import org.exoplatform.services.jcr.access.PermissionType;
+import org.exoplatform.services.jcr.core.ManageableRepository;
+import org.exoplatform.services.jcr.datamodel.IllegalNameException;
+import org.exoplatform.services.jcr.ext.app.SessionProviderService;
+import org.exoplatform.services.jcr.ext.common.SessionProvider;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.web.application.ApplicationMessage;
 import org.exoplatform.webui.application.WebuiRequestContext;
+import org.exoplatform.webui.commons.UIDocumentSelector;
+import org.exoplatform.webui.commons.UISaveAttachment;
 import org.exoplatform.webui.config.annotation.ComponentConfig;
 import org.exoplatform.webui.config.annotation.EventConfig;
 import org.exoplatform.webui.core.UIComponent;
@@ -53,12 +70,12 @@ import org.exoplatform.webui.form.UIFormStringInput;
   template = "app:groovy/webui/commons/imagecrop/UIImageCroppingUploadContent.gtmpl",
   events = {
     @EventConfig(listeners = UIImageCroppingUploadContent.CropActionListener.class),
-    @EventConfig(listeners = UIImageCroppingUploadContent.SaveActionListener.class, phase = Phase.PROCESS),
     @EventConfig(listeners = UIImageCroppingUploadContent.CancelActionListener.class)
   }
 )
 public class UIImageCroppingUploadContent extends UIForm {
   
+
   private static final Log LOG = ExoLogger.getLogger(UIImageCroppingUploadContent.class);
   private static final String CROPPED_INFO = "croppedInfo";
   private static final String X = "X";
@@ -66,6 +83,7 @@ public class UIImageCroppingUploadContent extends UIForm {
   private static final String WIDTH = "WIDTH";
   private static final String HEIGHT = "HEIGHT";
   
+  private String                filePath           = "";
   /** AvatarAttachment instance. */
   private ImageCroppingAttachment imageAttachment;
 
@@ -148,6 +166,14 @@ public class UIImageCroppingUploadContent extends UIForm {
   public void setResizedImgInBytes(byte[] resizedImgInBytes) {
     this.resizedImgInBytes = resizedImgInBytes;
   }
+  
+  public String getFilePath() {
+    return filePath;
+  }
+
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
+  }
 
   /**
    * Crop image, make preview image.
@@ -186,17 +212,18 @@ public class UIImageCroppingUploadContent extends UIForm {
       InputStream input = new ByteArrayInputStream(imageInByte);
       att.setInputStream(input);    
       uiUploadContent.setAvatarAttachment(att);      
-      event.getRequestContext().addUIComponentToUpdateByAjax(uiUploadContent);
+      event.getRequestContext().addUIComponentToUpdateByAjax(uiUploadContent); 
+      
       
       //save image cropping
-      saveImageCropping(uiUploadContent);
+      saveImageCropping(uiUploadContent, event);
       UIPopupWindow uiPopup = uiUploadContent.getParent();
       uiPopup.setShow(false);
-      //Utils.updateWorkingWorkSpace(); 
+//      Utils.updateWorkingWorkSpace(); 
     }
 
     
-    private void saveImageCropping(UIImageCroppingUploadContent uiAvatarUploadContent) throws Exception {
+    private void saveImageCropping(UIImageCroppingUploadContent uiAvatarUploadContent, Event<UIImageCroppingUploadContent> event) throws Exception {
       LOG.info("CropActionListener --- saveImageCropping");
       UIComponent parent =uiAvatarUploadContent.getParent();
       while (parent != null) {
@@ -214,7 +241,7 @@ public class UIImageCroppingUploadContent extends UIForm {
       }
       
       // Save user avatar
-      uiAvatarUploadContent.saveUserAvatar(uiAvatarUploadContent);
+      uiAvatarUploadContent.saveUserAvatar(uiAvatarUploadContent, event);
       return;
     }
     
@@ -231,46 +258,46 @@ public class UIImageCroppingUploadContent extends UIForm {
     }
   }
   
-  /**
-   * Accepts and saves the uploaded image to profile.
-   * Closes the popup window, refreshes UIProfile.
-   *
-   */
-  public static class SaveActionListener extends EventListener<UIImageCroppingUploadContent> {
-    @Override
-    public void execute(Event<UIImageCroppingUploadContent> event) throws Exception {
-      UIImageCroppingUploadContent uiAvatarUploadContent = event.getSource();
-      
-      // crop image
-      uiAvatarUploadContent.crop();
-      
-      saveImageCropping(uiAvatarUploadContent);
-      UIPopupWindow uiPopup = uiAvatarUploadContent.getParent();
-      uiPopup.setShow(false);
-      //Utils.updateWorkingWorkSpace();
-    }
-
-    private void saveImageCropping(UIImageCroppingUploadContent uiAvatarUploadContent) throws Exception {
-      UIComponent parent =uiAvatarUploadContent.getParent();
-      while (parent != null) {
-         /*if (UISpaceInfo.class.isInstance(parent)) {
-           UISpaceInfo uiSpaceInfo = ((UISpaceInfo)parent);
-           SpaceService spaceService = uiSpaceInfo.getSpaceService();
-           String id = uiSpaceInfo.getUIStringInput("id").getValue();
-           Space space = spaceService.getSpaceById(id);
-           if (space != null) {
-             uiSpaceInfo.saveAvatar(uiAvatarUploadContent, space);
-             return;
-           }
-         }*/
-         parent = parent.getParent();
-      }
-      
-      // Save user avatar
-      uiAvatarUploadContent.saveUserAvatar(uiAvatarUploadContent);
-      return;
-    }
-  }
+//  /**
+//   * Accepts and saves the uploaded image to profile.
+//   * Closes the popup window, refreshes UIProfile.
+//   *
+//   */
+//  public static class SaveActionListener extends EventListener<UIImageCroppingUploadContent> {
+//    @Override
+//    public void execute(Event<UIImageCroppingUploadContent> event) throws Exception {
+//      UIImageCroppingUploadContent uiAvatarUploadContent = event.getSource();
+//      
+//      // crop image
+//      uiAvatarUploadContent.crop();
+//      
+//      saveImageCropping(uiAvatarUploadContent);
+//      UIPopupWindow uiPopup = uiAvatarUploadContent.getParent();
+//      uiPopup.setShow(false);
+//      //Utils.updateWorkingWorkSpace();
+//    }
+//
+//    private void saveImageCropping(UIImageCroppingUploadContent uiAvatarUploadContent,Event<UIImageCroppingUploadContent> event) throws Exception {
+//      UIComponent parent =uiAvatarUploadContent.getParent();
+//      while (parent != null) {
+//         /*if (UISpaceInfo.class.isInstance(parent)) {
+//           UISpaceInfo uiSpaceInfo = ((UISpaceInfo)parent);
+//           SpaceService spaceService = uiSpaceInfo.getSpaceService();
+//           String id = uiSpaceInfo.getUIStringInput("id").getValue();
+//           Space space = spaceService.getSpaceById(id);
+//           if (space != null) {
+//             uiSpaceInfo.saveAvatar(uiAvatarUploadContent, space);
+//             return;
+//           }
+//         }*/
+//         parent = parent.getParent();
+//      }
+//      
+//      // Save user avatar
+//      uiAvatarUploadContent.saveUserAvatar(uiAvatarUploadContent, event);
+//      return;
+//    }
+//  }
 
   /**
    * Saves avatar of users.
@@ -279,8 +306,90 @@ public class UIImageCroppingUploadContent extends UIForm {
    * @throws Exception
    * @since 1.2.2
    */
-  public void saveUserAvatar(UIImageCroppingUploadContent uiAvatarUploadContent) throws Exception {
+  public void saveUserAvatar(UIImageCroppingUploadContent uiAvatarUploadContent, Event<UIImageCroppingUploadContent> event) throws Exception {
     ImageCroppingAttachment attacthment = uiAvatarUploadContent.getAvatarAttachment();
+    LOG.info("---------saveUserAvatar--------");
+       
+    //copy UISaveAttachment
+    UIImageCroppingUploadContent component = event.getSource();
+    LOG.info("--event.getSource()");
+    
+    LOG.info("--file path: "+component.filePath);
+    
+    String tempPath = component.filePath.substring(1);
+    
+
+    String workspaceName = tempPath.substring(0, tempPath.indexOf("/"));
+    LOG.info("--workspaceName: "+workspaceName);
+
+      String nodePath = tempPath.substring(tempPath.indexOf("/"));
+      Session srcSession = component.getUserSession(workspaceName);
+      Node srcNode = (Node) srcSession.getItem(nodePath);
+      Node srcContent = srcNode.getNode("jcr:content");
+      Value value = srcContent.getProperty("jcr:data").getValue();
+      String mimeType = srcContent.getProperty("jcr:mimeType").getString();
+//      srcSession.logout();
+      
+//      String selectedFolder = selector.getSeletedFolder();
+//      if (StringUtils.isEmpty(selectedFolder)) {
+//        event.getRequestContext().getUIApplication().addMessage(new ApplicationMessage("UISaveAttachment.msg.not-a-folder",
+//                                                                                       null,
+//                                                                                       ApplicationMessage.WARNING));
+//        ((PortalRequestContext) event.getRequestContext().getParentAppRequestContext()).ignoreAJAXUpdateOnPortlets(true);
+//        return;
+//      }
+//      String desWorkSpace = selectedFolder.substring(0, selectedFolder.indexOf("/"));
+//      Session desSession = component.getUserSession(desWorkSpace);
+//      selectedFolder = selectedFolder.substring(selectedFolder.indexOf("/"));
+//      Node desNode = (Node) desSession.getItem(selectedFolder);
+//      try {
+//        desSession.checkPermission(desNode.getPath(), PermissionType.ADD_NODE);
+//      } catch (RepositoryException e) {
+//        event.getRequestContext()
+//             .getUIApplication()
+//             .addMessage(new ApplicationMessage("UISaveAttachment.msg.save-file-not-allow", null, ApplicationMessage.WARNING));
+//        ((PortalRequestContext) event.getRequestContext().getParentAppRequestContext()).ignoreAJAXUpdateOnPortlets(true);
+//        return;
+//      }
+//      try {
+//        validate(fileName);
+//      } catch (IllegalNameException e) {
+//        event.getRequestContext().getUIApplication().addMessage(new ApplicationMessage("UISaveAttachment.msg.not-valid-name",
+//                                                new String[] { invalidCharacters },
+//                                                ApplicationMessage.WARNING));
+//        ((PortalRequestContext) event.getRequestContext().getParentAppRequestContext()).ignoreAJAXUpdateOnPortlets(true);
+//        return;
+//      }
+      Node file = srcNode.addNode(uiAvatarUploadContent.getAvatarAttachment().getFileName(), "nt:file");
+      Node jcrContent = file.addNode("jcr:content", "nt:resource");
+      jcrContent.setProperty("jcr:data", value);
+      jcrContent.setProperty("jcr:lastModified", new GregorianCalendar());
+      jcrContent.setProperty("jcr:mimeType", mimeType);
+      
+     // desSession.save();
+     // desSession.logout();
+      
+      LOG.info("--node filepath: "+ file.getPath());
+      
+      srcSession.save();
+      srcSession.logout();      
+      
+
+      UIPopupWindow uiPopupWindow = event.getSource().getParent();
+      uiPopupWindow.setUIComponent(null);
+      uiPopupWindow.setRendered(false);
+      event.getRequestContext().getUIApplication().addMessage(new ApplicationMessage("UISaveAttachment.msg.saved-successfully",
+                                                                                     null,
+                                                                                     ApplicationMessage.INFO));
+      event.getRequestContext().addUIComponentToUpdateByAjax(uiPopupWindow.getParent());      
+    
+    
+    
+    
+    
+    
+    
+    
     
     /*Profile p = Utils.getOwnerIdentity().getProfile();
     p.setProperty(Profile.AVATAR, attacthment);
@@ -404,4 +513,19 @@ public class UIImageCroppingUploadContent extends UIForm {
     att.setInputStream(input);    
     setAvatarAttachment(att);
   }
+  
+  public Session getUserSession(String workspace) throws Exception {
+    ManageableRepository repository = getCurrentRepository();
+    SessionProviderService sessionProviderService = (SessionProviderService) PortalContainer.getInstance()
+                                                            .getComponentInstanceOfType(SessionProviderService.class);
+    SessionProvider sessionProvider = sessionProviderService.getSessionProvider(null);
+    return sessionProvider.getSession(workspace, repository);
+  }
+  
+  private ManageableRepository getCurrentRepository() throws RepositoryException {
+    RepositoryService repoService = (RepositoryService) PortalContainer.getInstance()
+                                                                       .getComponentInstanceOfType(RepositoryService.class);
+    return repoService.getCurrentRepository();
+  }
+  
 }

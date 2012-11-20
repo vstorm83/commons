@@ -22,10 +22,16 @@ import javax.jcr.ItemNotFoundException;
 import javax.jcr.Node;
 import javax.jcr.Session;
 
+import org.exoplatform.container.ExoContainer;
+import org.exoplatform.container.ExoContainerContext;
 import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.xml.PortalContainerInfo;
+import org.exoplatform.portal.application.PortalRequestContext;
 import org.exoplatform.services.jcr.RepositoryService;
+import org.exoplatform.services.jcr.core.ManageableRepository;
 import org.exoplatform.services.log.ExoLogger;
 import org.exoplatform.services.log.Log;
+import org.exoplatform.webui.application.WebuiRequestContext;
 
 /**
  * Created by The eXo Platform SAS
@@ -104,7 +110,7 @@ public class ImageCroppingAttachment {
   public String getDataPath(PortalContainer portalContainer) throws Exception {
     Node attachmentData;
     try {
-      attachmentData = (Node) getSession(portalContainer).getItem(getId());
+      attachmentData = (Node) getCurrentSession().getItem(getId());
     } catch (ItemNotFoundException e) {
       LOG.warn("Failed to get data path", e);
       return null;
@@ -121,7 +127,7 @@ public class ImageCroppingAttachment {
   public String getDataPath() throws Exception {
     Node attachmentData;
     try {
-      attachmentData = (Node) getSession().getItem(getId());
+      attachmentData = (Node) getCurrentSession().getItem(getId());
     } catch (ItemNotFoundException e) {
       LOG.warn("Failed to get data path", e);
       return null;
@@ -268,28 +274,46 @@ public class ImageCroppingAttachment {
     }
   }
 
+
+
   /**
    * Gets the session from a portal container.
    *
    * @return the session
    * @throws Exception the exception
    */
-  private Session getSession(PortalContainer portalcontainer) throws Exception {
-    RepositoryService repoService = (RepositoryService) portalcontainer
-                                    .getComponentInstanceOfType(RepositoryService.class);
-    return repoService.getDefaultRepository().getSystemSession(workspace);
-  }
-
-  /**
-   * Gets the session.
-   *
-   * @return the session
-   * @throws Exception the exception
-   */
-  private Session getSession() throws Exception {
+ public Session getCurrentSession() throws Exception {
     RepositoryService repoService = (RepositoryService) PortalContainer.getInstance()
-                                    .getComponentInstanceOfType(RepositoryService.class);
-    return repoService.getDefaultRepository().getSystemSession(workspace);
+                                                                       .getComponentInstanceOfType(RepositoryService.class);
+    String defaultWorkspace = repoService.getCurrentRepository()
+                                         .getConfiguration()
+                                         .getDefaultWorkspaceName();
+    return repoService.getDefaultRepository().getSystemSession(defaultWorkspace);
   }
+  
+  private String getPortalName() {
+    ExoContainer container = ExoContainerContext.getCurrentContainer();
+    PortalContainerInfo containerInfo = (PortalContainerInfo) container.getComponentInstanceOfType(PortalContainerInfo.class);
+    return containerInfo.getContainerName();
+  }
+  
+  public String getFileURL(String path) throws Exception {
+    WebuiRequestContext context = WebuiRequestContext.getCurrentInstance();
+    if (!(context instanceof PortalRequestContext)) {
+      context = (WebuiRequestContext) context.getParentAppRequestContext();
+    }
+    String portalName = getPortalName();
+    String requestURL = ((PortalRequestContext) context).getRequest().getRequestURL().toString();
+    String domainURL = requestURL.substring(0, requestURL.indexOf(portalName));
+    Session session = getCurrentSession();
+    String workspace = session.getWorkspace().getName();
+    String repository = ((ManageableRepository) session.getRepository()).getConfiguration()
+                                                                        .getName();
+
+    String url = domainURL + portalName + "/" + PortalContainer.getCurrentRestContextName()
+        + "/jcr/" + repository + "/" + workspace + path;
+    return url;
+  }
+  
 
 }
