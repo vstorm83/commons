@@ -23,6 +23,10 @@
 			<name>eXo.commons.UIDSUpload</name>
 			<path>/javascript/eXo/commons/UIDSUpload.js</path>
 		</script>
+		<script>
+			<name>eXo.commons.UIFormUploadInput</name>
+			<path>/javascript/eXo/commons/UIFormUploadInput.js</path>
+		</script>
 		<depends>
 			<module>jquery</module>	
 			<as>jQuery</as>	
