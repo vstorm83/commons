@@ -10,26 +10,19 @@
 		<css-path>/skin/DefaultSkin/commons/Stylesheet.css</css-path>
 		<css-priority>5</css-priority>
 	</portal-skin>
-	
- 
-  	<portal-skin>
+
+	<portal-skin>
 		<skin-name>Default</skin-name>
-		<skin-module>DocumentSelector</skin-module>
+		<skin-module>ImageCropping</skin-module>
 		<css-path>/skin/DefaultSkin/commons/UIImageCropping/jWindowCrop.css</css-path>
-		<css-priority>1</css-priority>
+		<css-priority>5</css-priority>
 	</portal-skin>
 
 	<module>
 		<name>commons-document</name>
 		<as>doc</as>
 		<script>
-			<name>eXo.commons.DocumentSelector</name>
-			<path>/javascript/eXo/commons/DocumentSelector.js</path>
-		</script>
-		<!-- UIDSUpload depends DocumentSelector -->
-		<script>
-			<name>eXo.commons.UIDSUpload</name>
-			<path>/javascript/eXo/commons/UIDSUpload.js</path>
+			<path>/javascript/eXo/commons/commons-Document.js</path>
 		</script>
 		<depends>
 			<module>jquery</module>	
@@ -46,16 +39,11 @@
 		<name>commons-editor</name>
 		<as>ckeditor</as>
 		<script>
-			<name>eXo.commons.ExoEditor</name>
-			<path>/ckeditor/exoeditor.js</path>
-		</script>
-		<script>
-			<name>eXo.commons.ExoEditorConfig</name>
-			<path>/ckeditor/eXoConfig.js</path>
-		</script>
-	</module>
-	
-	
+			<path>/ckeditor/commons-Editor.js</path>
+		</script> 		
+ 	</module>
+
+
 <!-- image cropping -->
 	 <module>
 	    <name>jWindowCropper</name>
@@ -81,9 +69,6 @@
 	       <module>jWindowCropper</module>
 	       <as>jWCropper</as>
 	    </depends>
-	  </module>   	
-	
-	
-
+	  </module>
 </gatein-resources>
 
