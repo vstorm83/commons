@@ -14,15 +14,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-package org.exoplatform.commons.settings.model.api;
+package org.exoplatform.job;
 
+import org.exoplatform.job.MultiTenancyJob;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 /**
  * Created by The eXo Platform SAS
- * Author : Nguyen Viet Bang
- *          bangnv@exoplatform.com
- * Nov 27, 2012  
+ * Author : Canh Pham Van
+ *          canhpv@exoplatform.com
+ * Oct 18, 2012  
  */
-public enum EventType {
-  SETTING_SET,SETTING_REMOVE_CONTEXT,SETTING_REMOVE_SCOPE,SETTING_REMOVE_KEY
+public class MultiTenancyJobImpl extends MultiTenancyJob{
+
+  @Override
+  public Class<? extends MultiTenancyTask> getTask() {
+    return ReminderTask.class;
+  }
+  
+  public class ReminderTask extends MultiTenancyTask{
+
+    public ReminderTask(JobExecutionContext context, String repoName) {
+      super(context, repoName);
+    }
+    
+  }
+  
+  @Override
+  public void execute(JobExecutionContext context) throws JobExecutionException {
+    // TODO Auto-generated method stub
+    super.execute(context);
+  }
+  
+  
 }
