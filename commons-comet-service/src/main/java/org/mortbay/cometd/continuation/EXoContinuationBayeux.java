@@ -309,7 +309,19 @@ public class EXoContinuationBayeux extends BayeuxServerImpl {
         client.addListener(this);
 
         String eXoID = (String) message.get("exoId");
-        eXoID = bayeux.toCloudId(eXoID);
+//        eXoID = bayeux.toCloudId(eXoID);
+        String host = server.getContext().getHeader("host").replace("www.", "");
+        String[] parts = host.split("\\.");
+        String tenant = null;
+        if (parts.length > 1) {
+          tenant = parts[0];
+        }
+        
+        if (tenant != null) {
+          eXoID = tenant + bayeux.cloudIDSeparator + eXoID; 
+        } else {
+          eXoID = bayeux.toCloudId(eXoID);
+        }
         Set<String> cIds = clientIDs.get(eXoID);
         if (cIds == null) {
           cIds = new ConcurrentHashSet<String>();
