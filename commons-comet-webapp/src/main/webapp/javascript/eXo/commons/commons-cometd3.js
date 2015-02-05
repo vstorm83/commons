@@ -3,6 +3,7 @@
   
 	var cCometD = $.extend({
 	    eXoSecret: {exoId: null, exoToken: null},
+	    eXoExt: {},
 	    eXoResubs: [],
 	    eXoPublish: [],
 	    eXoRemoteCalls: [],
@@ -15,6 +16,9 @@
 	        exoId: config.exoId,
 	        exoToken: config.exoToken
 	    }
+	  }
+	  if (config.ext) {
+	    eXoExt.ext = config.ext;
 	  }
 	  if (typeof config.autoResubscribe != 'undefined') {
 	    this.autoResubscribe = config.autoResubscribe;
@@ -61,7 +65,7 @@
     if (!subscribeProps) {
       subscribeProps = {}
     }
-    subscribeProps = $.extend({}, cCometD.eXoSecret, subscribeProps);
+    subscribeProps = $.extend({}, cCometD.eXoSecret, cCometD.eXoExt, subscribeProps);
     
     if (this.autoResubscribe) {
       this.eXoResubs.push([channel, scope, callback, subscribeProps, subscribeCallback]);

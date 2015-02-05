@@ -18,10 +18,16 @@ package org.exoplatform.ws.frameworks.cometd;
  */
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
+import org.cometd.bayeux.server.BayeuxServer;
+import org.cometd.bayeux.server.ServerMessage;
+import org.cometd.bayeux.server.ServerMessage.Mutable;
 import org.cometd.bayeux.server.ServerSession;
 import org.cometd.server.ServerChannelImpl;
 import org.mortbay.cometd.continuation.EXoContinuationBayeux;
+import org.picocontainer.Startable;
 
 /**
  * Created by The eXo Platform SAS.
@@ -30,15 +36,52 @@ import org.mortbay.cometd.continuation.EXoContinuationBayeux;
  * @version $Id: $
  */
 
-public class ContinuationService {
+public class ContinuationService implements Startable {
 
   private final EXoContinuationBayeux bayeux;
+
+  private List<SessionExtension> sessionExtensions;
+
+  private ServerSession.Extension delegate;
 
   /**
    * @param bayeux
    */
   public ContinuationService(EXoContinuationBayeux bayeux) {
     this.bayeux = bayeux;
+    sessionExtensions = new LinkedList<SessionExtension>();
+    delegate = new ServerSession.Extension() {
+      
+      @Override
+      public boolean sendMeta(ServerSession session, Mutable message) {
+        return true;
+      }
+      
+      @Override
+      public ServerMessage send(ServerSession session, ServerMessage message) {
+        if (sessionExtensions.size() > 0) {
+          Session sWrap = new SessionWrapper(session);
+          Message mWrap = new MessageWrapper(message);
+
+          for (SessionExtension extension : sessionExtensions) {
+            if (extension.send(sWrap, mWrap) == null) {
+              return null;
+            }
+          }          
+        }
+        return message;
+      }
+      
+      @Override
+      public boolean rcvMeta(ServerSession session, Mutable message) {
+        return true;
+      }
+      
+      @Override
+      public boolean rcv(ServerSession session, Mutable message) {
+        return true;
+      }
+    };
   }
 
   /**
@@ -149,6 +192,28 @@ public class ContinuationService {
   public void sendBroadcastMessage(String channel, Object data, String msgId) {
     bayeux.sendBroadcastMessage(channel, data, msgId);
   }
+  
+  public void registerSessionListener(final SessionListener listener) {
+    bayeux.addListener(new BayeuxServer.SessionListener() {
+      @Override
+      public void sessionRemoved(ServerSession session, boolean timedout) {
+        listener.sessionRemoved(new SessionWrapper(session), timedout);
+      }
+      
+      @Override
+      public void sessionAdded(ServerSession session, ServerMessage message) {
+        listener.sessionAdded(new SessionWrapper(session), new MessageWrapper(message));
+      }
+    });
+  }
+  
+  public void addSessionExtension(SessionExtension extension) {
+    sessionExtensions.add(extension);
+  }
+  
+  public void removeSessionExtension(SessionExtension extension) {
+    sessionExtensions.remove(extension);
+  }
 
   /**
    * @param eXoId the client id (as eXoId).
@@ -157,5 +222,26 @@ public class ContinuationService {
   public String getUserToken(String eXoId) {
     return bayeux.getUserToken(eXoId);
   }
+
+  @Override
+  public void start() {
+    bayeux.addListener(new BayeuxServer.SessionListener() {      
+      @Override
+      public void sessionRemoved(ServerSession session, boolean timedout) {        
+      }
+      
+      @Override
+      public void sessionAdded(ServerSession session, ServerMessage message) {
+        session.addExtension(delegate);
+      }
+    });
+
+    //Support localization
+    registerSessionListener(new ContextualSessionListener()); 
+    addSessionExtension(new LocalizationExtension());
+  }
+
+  @Override
+  public void stop() {}
 
 }
