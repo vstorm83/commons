@@ -24,12 +24,11 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.MessageHandler;
 import javax.websocket.Session;
 
-import org.exoplatform.container.ExoContainer;
-import org.exoplatform.container.ExoContainerContext;
+import org.exoplatform.container.PortalContainer;
+import org.exoplatform.container.RootContainer;
 
-@SuppressWarnings("rawtypes")
-public abstract class AbstractEndpoint extends Endpoint implements MessageHandler.Whole,
-    MessageHandler.Partial {
+public abstract class AbstractEndpoint extends Endpoint implements MessageHandler.Whole<String>,
+    MessageHandler.Partial<String> {
   protected volatile Session _session;
 
   private ExtensibleWSFilter filter;
@@ -44,31 +43,29 @@ public abstract class AbstractEndpoint extends Endpoint implements MessageHandle
   @Override
   public void onClose(Session wsSession, CloseReason closeReason) {
     _session = wsSession;
-    wsSession.addMessageHandler(this);
     getFilter().onClose(wsSession, closeReason, this);
   }
 
   @Override
   public void onError(Session wsSession, Throwable failure) {
     _session = wsSession;
-    wsSession.addMessageHandler(this);
     getFilter().onError(wsSession, failure, this);
   }
 
   @Override
-  public void onMessage(Object data) {
-    getFilter().onMessage(data, this);
+  public void onMessage(String message) {
+    getFilter().onMessage(message, this);
   }
 
   @Override
-  public void onMessage(Object arg0, boolean arg1) {
-    getFilter().onMessage(arg0, arg1, this);
+  public void onMessage(String message, boolean arg1) {
+    getFilter().onMessage(message, arg1, this);
   }
 
   private ExtensibleWSFilter getFilter() {
     if (filter == null) {
-      ExoContainer container = ExoContainerContext.getCurrentContainer();
-      filter = (ExtensibleWSFilter) container.getComponentInstance(ExtensibleWSFilter.class);
+      PortalContainer container = RootContainer.getInstance().getPortalContainer(PortalContainer.getCurrentPortalContainerName());
+      filter = (ExtensibleWSFilter) container.getComponentInstanceOfType(ExtensibleWSFilter.class);
     }
     return filter;
   }
@@ -79,7 +76,7 @@ public abstract class AbstractEndpoint extends Endpoint implements MessageHandle
 
   protected abstract void doError(Session wsSession, Throwable failure);
 
-  protected abstract void doMessage(Session wsSession, Object data);
+  protected abstract void doMessage(Session wsSession, String message);
 
-  protected abstract void doMessage(Session wsSession, Object arg0, boolean arg1);
+  protected abstract void doMessage(Session wsSession, String message, boolean arg1);
 }

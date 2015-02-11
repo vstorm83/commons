@@ -31,6 +31,10 @@ public class WSFilterDefinition {
 
   private List<String>           patterns;
 
+
+  public WSFilterDefinition() {
+  }
+  
   public WSFilterDefinition(WSFilter filter, List<String> patterns) {
     this.filter = filter;
     this.patterns = patterns;

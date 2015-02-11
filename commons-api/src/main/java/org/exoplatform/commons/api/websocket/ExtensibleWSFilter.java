@@ -62,14 +62,14 @@ public class ExtensibleWSFilter {
     efChain.onError(wsSession, failure);
   }
 
-  public void onMessage(Object data, AbstractEndpoint delegate) {
+  public void onMessage(String message, AbstractEndpoint delegate) {
     ExtensibleFilterChain efChain = new ExtensibleFilterChain(filters, delegate);
-    efChain.onMessage(delegate._session, data);
+    efChain.onMessage(delegate._session, message);
   }
 
-  public void onMessage(Object arg0, boolean arg1, AbstractEndpoint delegate) {
+  public void onMessage(String message, boolean arg1, AbstractEndpoint delegate) {
     ExtensibleFilterChain efChain = new ExtensibleFilterChain(filters, delegate);
-    efChain.onMessage(delegate._session, arg0, arg1);
+    efChain.onMessage(delegate._session, message, arg1);
   }
 
   public class ExtensibleFilterChain {
@@ -82,26 +82,26 @@ public class ExtensibleWSFilter {
       this.delegate = delegate;
     }
 
-    public void onMessage(Session wsSession, Object arg0, boolean arg1) {
+    public void onMessage(Session wsSession, String message, boolean arg1) {
       while (filters.hasNext()) {
         WSFilterDefinition filterDef = filters.next();
         if (filterDef.match(wsSession.getRequestURI().getPath())) {
-          filterDef.getFilter().onMessage(wsSession, arg0, arg1, this);
+          filterDef.getFilter().onMessage(wsSession, message, arg1, this);
           return;
         }
       }
-      delegate.doMessage(wsSession, arg0, arg1);
+      delegate.doMessage(wsSession, message, arg1);
     }
 
-    public void onMessage(Session wsSession, Object data) {
+    public void onMessage(Session wsSession, String message) {
       while (filters.hasNext()) {
         WSFilterDefinition filterDef = filters.next();
         if (filterDef.match(wsSession.getRequestURI().getPath())) {
-          filterDef.getFilter().onMessage(wsSession, data, this);
+          filterDef.getFilter().onMessage(wsSession, message, this);
           return;
         }
       }
-      delegate.doMessage(wsSession, data);
+      delegate.doMessage(wsSession, message);
     }
 
     public void onError(Session wsSession, Throwable failure) {

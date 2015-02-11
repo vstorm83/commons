@@ -139,11 +139,10 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
 
   private class WebSocketScheduler extends AbstractEndpoint implements AbstractServerTransport.Scheduler {
     private final WSSchedulerDelegate delegate;
-
-    private volatile Session                 _wsSession;
+    private volatile Session  _wsSession;
 
     private WebSocketScheduler(WebSocketContext context) {
-      delegate = new WSSchedulerDelegate(context, _wsSession);
+      delegate = new WSSchedulerDelegate(context);
     }
 
     @Override
@@ -155,9 +154,11 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
     public void schedule() {
       delegate.schedule();
     }
-
+    
     @Override
     protected void doOpen(Session wsSession, EndpointConfig config) {
+      _wsSession = wsSession;
+      delegate.setSession(wsSession);
     }
 
     @Override
@@ -171,25 +172,29 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
     }
 
     @Override
-    protected void doMessage(Session wsSession, Object data) {
+    protected void doMessage(Session wsSession, String message) {
       if (_logger.isDebugEnabled())
         _logger.debug("WebSocket Text message on {}/{}",
                       ExoWebSocketTransport.this.hashCode(),
                       hashCode());
-      delegate.onMessage(_wsSession, data.toString());
+      delegate.onMessage(_wsSession, message);
     }
 
     @Override
-    protected void doMessage(Session wsSession, Object arg0, boolean arg1) {      
+    protected void doMessage(Session wsSession, String message, boolean arg1) {   
+      if (_logger.isDebugEnabled())
+        _logger.debug("WebSocket Text message on {}/{}",
+                      ExoWebSocketTransport.this.hashCode(),
+                      hashCode());
+      delegate.onMessage(_wsSession, message);
     }
   }
   
   private class WSSchedulerDelegate extends AbstractWebSocketScheduler {
     private Session session;
     
-    public WSSchedulerDelegate(WebSocketContext context, Session session) {
+    public WSSchedulerDelegate(WebSocketContext context) {
       super(context);
-      this.session = session;
     }
     
     @Override
@@ -222,6 +227,10 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
     @Override
     protected void schedule(boolean timeout, ServerMessage.Mutable expiredConnectReply) {
       schedule(session, timeout, expiredConnectReply);
+    }
+    
+    public void setSession(Session session){
+      this.session = session;
     }
   }
 
@@ -261,6 +270,8 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
       // Hopefully this will become a standard, for now it's Jetty specific.
       this.localAddress = (InetSocketAddress) userProperties.get("javax.websocket.endpoint.localAddress");
       this.remoteAddress = (InetSocketAddress) userProperties.get("javax.websocket.endpoint.remoteAddress");
+      //keep hostname for wsfilter
+      userProperties.put("host",  getHeader("host"));
     }
 
     @Override
