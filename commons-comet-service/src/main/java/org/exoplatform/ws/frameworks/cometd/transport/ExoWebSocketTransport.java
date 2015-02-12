@@ -48,6 +48,7 @@ import org.cometd.server.BayeuxServerImpl;
 import org.cometd.websocket.server.AbstractWebSocketTransport;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.component.LifeCycle;
+import org.exoplatform.commons.api.websocket.AbstractConfigurator;
 import org.exoplatform.commons.api.websocket.AbstractEndpoint;
 
 public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
@@ -138,8 +139,7 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
   }
 
   private class WebSocketScheduler extends AbstractEndpoint implements AbstractServerTransport.Scheduler {
-    private final WSSchedulerDelegate delegate;
-    private volatile Session  _wsSession;
+    private WSSchedulerDelegate delegate;
 
     private WebSocketScheduler(WebSocketContext context) {
       delegate = new WSSchedulerDelegate(context);
@@ -157,7 +157,6 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
     
     @Override
     protected void doOpen(Session wsSession, EndpointConfig config) {
-      _wsSession = wsSession;
       delegate.setSession(wsSession);
     }
 
@@ -177,7 +176,7 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
         _logger.debug("WebSocket Text message on {}/{}",
                       ExoWebSocketTransport.this.hashCode(),
                       hashCode());
-      delegate.onMessage(_wsSession, message);
+      delegate.onMessage(wsSession, message);
     }
 
     @Override
@@ -186,7 +185,7 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
         _logger.debug("WebSocket Text message on {}/{}",
                       ExoWebSocketTransport.this.hashCode(),
                       hashCode());
-      delegate.onMessage(_wsSession, message);
+      delegate.onMessage(wsSession, message);
     }
   }
   
@@ -229,7 +228,7 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
       schedule(session, timeout, expiredConnectReply);
     }
     
-    public void setSession(Session session){
+    public void setSession(Session session) {
       this.session = session;
     }
   }
@@ -270,8 +269,6 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
       // Hopefully this will become a standard, for now it's Jetty specific.
       this.localAddress = (InetSocketAddress) userProperties.get("javax.websocket.endpoint.localAddress");
       this.remoteAddress = (InetSocketAddress) userProperties.get("javax.websocket.endpoint.remoteAddress");
-      //keep hostname for wsfilter
-      userProperties.put("host",  getHeader("host"));
     }
 
     @Override
@@ -373,7 +370,7 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
     }
   }
 
-  private class Configurator extends ServerEndpointConfig.Configurator {
+  private class Configurator extends AbstractConfigurator {
     private final ServletContext servletContext;
 
     private WebSocketContext     bayeuxContext;
@@ -388,7 +385,7 @@ public class ExoWebSocketTransport extends AbstractWebSocketTransport<Session> {
     }
 
     @Override
-    public void modifyHandshake(ServerEndpointConfig sec,
+    public void doModifyHandshake(ServerEndpointConfig sec,
                                 HandshakeRequest request,
                                 HandshakeResponse response) {
       this.bayeuxContext = new WebSocketContext(servletContext, request, sec.getUserProperties());
